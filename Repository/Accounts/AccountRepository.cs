@@ -4,7 +4,7 @@ using budgetifyAPI.Enums;
 using budgetifyAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace budgetifyAPI.Repository
+namespace budgetifyAPI.Repository.Accounts
 {
     public class AccountRepository : IAccountRepository
     {
@@ -32,22 +32,22 @@ namespace budgetifyAPI.Repository
 
         }
 
-        public async Task<Account> GetAccountById (int accountId)
+        public async Task<Account> GetAccountById(int accountId)
         {
             var account = await _ctx.Accounts.FindAsync(accountId);
             return account;
         }
 
-        public async Task UpdateAccountBalance (int accountId, decimal amount, TransactionType type)
+        public async Task UpdateAccountBalance(int accountId, decimal amount, TransactionType type)
         {
             var account = await _ctx.Accounts.FindAsync(accountId);
-            if(type == TransactionType.Income)
+            if (type == TransactionType.Income)
             {
-                account.Balance = account.Balance + amount;
+                account.Balance += amount;
             }
             if (type == TransactionType.Expense)
             {
-                account.Balance = account.Balance - amount;
+                account.Balance -= amount;
             }
             await _ctx.SaveChangesAsync();
         }

@@ -1,5 +1,5 @@
 ﻿using budgetifyAPI.Dtos;
-using budgetifyAPI.Repository;
+using budgetifyAPI.Repository.Incomes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers

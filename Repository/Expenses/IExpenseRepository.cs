@@ -1,6 +1,6 @@
 ﻿using budgetifyAPI.Dtos;
 
-namespace budgetifyAPI.Repository
+namespace budgetifyAPI.Repository.Expenses
 {
     public interface IExpenseRepository
     {

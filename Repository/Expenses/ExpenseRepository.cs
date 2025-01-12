@@ -2,9 +2,10 @@
 using budgetifyAPI.Dtos;
 using budgetifyAPI.Enums;
 using budgetifyAPI.Models;
+using budgetifyAPI.Repository.Accounts;
 using Microsoft.EntityFrameworkCore;
 
-namespace budgetifyAPI.Repository
+namespace budgetifyAPI.Repository.Expenses
 {
     public class ExpenseRepository : IExpenseRepository
     {
@@ -17,14 +18,14 @@ namespace budgetifyAPI.Repository
         }
 
         private AccountTransaction CreateTransaction(Account account, Expense expense)
-        {            
+        {
             var ThisTransaction = new AccountTransaction
             {
                 Type = TransactionType.Expense,
                 AccountId = expense.AccountId,
                 Amount = expense.Amount,
-                Description = expense.Description,                
-                ClosingBalance = account.Balance -expense.Amount
+                Description = expense.Description,
+                ClosingBalance = account.Balance - expense.Amount
             };
 
             return ThisTransaction;
@@ -96,7 +97,7 @@ namespace budgetifyAPI.Repository
                     var expenseCategoryDto = new ExpenseCategoryDto();
                     expenseCategoryDto.Id = category.Id;
                     expenseCategoryDto.Name = category.Name;
-                    expenseCategoryDto.Description = category.Description;                    
+                    expenseCategoryDto.Description = category.Description;
                     expenseTypeDto.ExpenseCategories.Add(expenseCategoryDto);
                 }
                 expenseTypes.Add(expenseTypeDto);
@@ -111,7 +112,7 @@ namespace budgetifyAPI.Repository
                             .Include(ec => ec.ExpenseType)
                             .ToListAsync();
             var expenseCategories = new List<ExpenseCategoryDto>();
-            foreach(var expenseCategory in data)
+            foreach (var expenseCategory in data)
             {
                 var expenseCategoryDto = new ExpenseCategoryDto();
                 expenseCategoryDto.Id = expenseCategory.Id;

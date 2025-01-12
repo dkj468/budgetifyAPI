@@ -1,7 +1,7 @@
 ﻿using budgetifyAPI.Dtos;
 using budgetifyAPI.Models;
 
-namespace budgetifyAPI.Repository
+namespace budgetifyAPI.Repository.Incomes
 {
     public interface IIncomeRepository
     {

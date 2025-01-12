@@ -1,10 +1,8 @@
 ﻿using budgetifyAPI.Data;
 using budgetifyAPI.Dtos;
-using budgetifyAPI.Enums;
-using budgetifyAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace budgetifyAPI.Repository
+namespace budgetifyAPI.Repository.Transactions
 {
     public class TransactionRepository : ITransactionRepository
     {
@@ -14,7 +12,7 @@ namespace budgetifyAPI.Repository
             _ctx = ctx;
         }
 
-        public async  Task<ICollection<TransactionDto>> GetAllTransactions()
+        public async Task<ICollection<TransactionDto>> GetAllTransactions()
         {
             var transactions = await _ctx.AccountTransactions
                                     .Include(at => at.Account)

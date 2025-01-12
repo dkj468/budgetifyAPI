@@ -2,7 +2,7 @@
 using budgetifyAPI.Enums;
 using budgetifyAPI.Models;
 
-namespace budgetifyAPI.Repository
+namespace budgetifyAPI.Repository.Accounts
 {
     public interface IAccountRepository
     {

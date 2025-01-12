@@ -17,6 +17,7 @@ namespace budgetifyAPI.Data
         public DbSet<AccountTransaction> AccountTransactions { get; set; }
         public DbSet<IncomeType> IncomeTypes { get; set; }
         public DbSet<Income> Incomes { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

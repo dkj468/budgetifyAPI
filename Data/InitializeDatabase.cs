@@ -25,11 +25,14 @@ namespace budgetifyAPI.Data
             if (await context.IncomeTypes.AnyAsync()) return;
             var incomeTypes = new List<IncomeType>
             {
+                new IncomeType {Name = "Initial balance", Description = "Initial Balance"},
                 new IncomeType {Name = "Salary", Description = "Monthly Salary"},
                 new IncomeType {Name = "Stock Divident", Description = "Stock dividents"},
                 new IncomeType { Name="Cash", Description="Cash received"},
                 new IncomeType { Name="Cashback", Description="Cashbacks received"},
-                new IncomeType { Name="Gift cards", Description="Gift cards"}
+                new IncomeType { Name="Gift cards", Description="Gift cards"},
+                new IncomeType { Name="Loan repayment", Description="Repayment of lended money"}
+
             };
             context.IncomeTypes.AddRange(incomeTypes);
             await context.SaveChangesAsync();
@@ -45,7 +48,9 @@ namespace budgetifyAPI.Data
                         {
                             new ExpenseCategory {Name = "Rent", Description = "House rent"},
                             new ExpenseCategory {Name = "Electricity", Description = "Electricity bill"},
-                            new ExpenseCategory {Name = "Internet", Description = "Internet Bill"}
+                            new ExpenseCategory {Name = "Internet", Description = "Internet Bill"},
+                            new ExpenseCategory {Name = "House Maid", Description = "Expense for house maid"},
+                            new ExpenseCategory {Name = "Baby nanny", Description = "Expenses for baby nanny"}
                         }
                 },
                 new ExpenseType {Name = "Food", Description = "Expenses for grocery, vegetables, fruits", 
@@ -80,6 +85,13 @@ namespace budgetifyAPI.Data
                         {
                             new ExpenseCategory {Name = "Mediclaim", Description = "Mediclaim premium"},
                             new ExpenseCategory {Name = "Term Insurance", Description = "Term Insurance"}
+
+                        }
+                },
+                new ExpenseType { Name="Personal loan", Description="Money given to friends, relative",
+                        ExpenseCategories = new List<ExpenseCategory>
+                        {
+                            new ExpenseCategory {Name = "Money Lent", Description = "Money given to friends"},
 
                         }
                 }

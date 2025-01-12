@@ -2,9 +2,11 @@
 using budgetifyAPI.Dtos;
 using budgetifyAPI.Enums;
 using budgetifyAPI.Models;
+using budgetifyAPI.Repository.Accounts;
+using budgetifyAPI.Repository.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace budgetifyAPI.Repository
+namespace budgetifyAPI.Repository.Incomes
 {
     public class IncomeRepostory : IIncomeRepository
     {
@@ -18,7 +20,7 @@ namespace budgetifyAPI.Repository
 
         private AccountTransaction CreateTransaction(Account account, Income income)
         {
-            
+
             var ThisTransaction = new AccountTransaction
             {
                 Type = TransactionType.Income,

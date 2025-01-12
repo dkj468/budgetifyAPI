@@ -1,10 +1,12 @@
 ﻿using budgetifyAPI.Dtos;
-using budgetifyAPI.Repository;
+using budgetifyAPI.Repository.Expenses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
 {
     [ApiController]
+    //[Authorize]
     [Route("[controller]")]
     public class ExpenseController : ControllerBase
     {

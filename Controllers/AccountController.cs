@@ -1,4 +1,4 @@
-﻿using budgetifyAPI.Repository;
+﻿using budgetifyAPI.Repository.Accounts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
