@@ -24,7 +24,7 @@ namespace budgetifyAPI.Repository.Transactions
                 {
                     Id = transaction.Id,
                     AccountId = transaction.AccountId,
-                    AccountName = transaction.Account.Name,
+                    AccountName = transaction.Account != null ? transaction.Account.Name : "",
                     Type = transaction.Type.ToString(),
                     DateCreated = transaction.DateCreated,
                     DateUpdated = transaction.DateUpdated,

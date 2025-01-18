@@ -36,10 +36,26 @@ namespace budgetifyAPI.Controllers
             return Ok(await _expenseRepo.GetAllExpenseTypes());
         }
 
+        [HttpPost("expensetypes")]
+        public async Task<IActionResult> CreateExpenseType(CreateExpenseTypeDto createExpenseType)
+        {
+            // TODO --- Add validation for expense type Name
+            var newExpenseType = await _expenseRepo.CreateExpenseType(createExpenseType);
+            return CreatedAtAction(nameof(createExpenseType), newExpenseType);
+        }
+
         [HttpGet("expensecategory")]
         public async Task<IActionResult> GetAllExpenseCategories()
         {
             return Ok(await _expenseRepo.GetAllExpenseCategories());
+        }
+
+        [HttpPost("expensecategory")]
+        public async Task<IActionResult> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory)
+        {
+            // TODO --- Add validation for expense category Name,Expense type id
+            var newExpenseCategory = await _expenseRepo.CreateExpenseCategory(createExpenseCategory);
+            return CreatedAtAction(nameof(CreateExpenseCategory), newExpenseCategory);
         }
     }
 }

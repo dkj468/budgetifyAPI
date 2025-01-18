@@ -13,7 +13,7 @@ namespace budgetifyAPI.Dtos
         public string Description { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public DateTime DateUpdated { get; set; } = DateTime.Now;
-        public int AccountId { get; set; }
+        public int? AccountId { get; set; }
         public string AccountName { get; set; }
     }
 }

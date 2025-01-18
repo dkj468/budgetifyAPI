@@ -8,6 +8,7 @@ namespace budgetifyAPI.Repository.Accounts
     {
         Task<ICollection<AccountDto>> GetAllAccounts();
         Task<Account> GetAccountById(int accountId);
+        Task<AccountDto> CreateAccount(CreateAccountDto account);
         Task UpdateAccountBalance(int accountId, decimal amount, TransactionType type);
     }
 }

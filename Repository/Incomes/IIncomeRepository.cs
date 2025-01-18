@@ -7,5 +7,6 @@ namespace budgetifyAPI.Repository.Incomes
     {
         Task CreateIncome(CreateIncomeDto Income);
         Task<ICollection<IncomeType>> GetAllIncomeType();
+        Task<IncomeType> CreateIncomeType(CreateIncomeTypeDto createIncomeType);
     }
 }

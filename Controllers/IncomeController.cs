@@ -30,6 +30,15 @@ namespace budgetifyAPI.Controllers
         }
 
 
+        [HttpPost("incometypes")]
+        public async Task<IActionResult> CreateIncomeType(CreateIncomeTypeDto createIncomeType)
+        {
+            // TODO --- Add validation for income type name
+            var newIncomeType = await _incomeRepo.CreateIncomeType(createIncomeType);
+            return CreatedAtAction(nameof(CreateIncomeType), newIncomeType);
+        }
+
+
     }
     
 }

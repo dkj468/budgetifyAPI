@@ -3,6 +3,7 @@ using budgetifyAPI.Dtos;
 using budgetifyAPI.Enums;
 using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Accounts;
+using budgetifyAPI.Repository.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace budgetifyAPI.Repository.Expenses
@@ -11,10 +12,13 @@ namespace budgetifyAPI.Repository.Expenses
     {
         private readonly DataContext _ctx;
         private readonly IAccountRepository _accountRepo;
-        public ExpenseRepository(DataContext ctx, IAccountRepository accountRepo)
+        private readonly IUserRepository _userRepo;
+        public ExpenseRepository(DataContext ctx, IAccountRepository accountRepo
+            , IUserRepository userRepo)
         {
             _ctx = ctx;
             _accountRepo = accountRepo;
+            _userRepo = userRepo;
         }
 
         private AccountTransaction CreateTransaction(Account account, Expense expense)
@@ -98,6 +102,11 @@ namespace budgetifyAPI.Repository.Expenses
                     expenseCategoryDto.Id = category.Id;
                     expenseCategoryDto.Name = category.Name;
                     expenseCategoryDto.Description = category.Description;
+                    expenseCategoryDto.ExpenseTypeDescription = expenseType.Description;
+                    expenseCategoryDto.ExpenseTypeName = expenseType.Name;
+                    expenseCategoryDto.ExpenseTypeId = expenseType.Id;
+
+
                     expenseTypeDto.ExpenseCategories.Add(expenseCategoryDto);
                 }
                 expenseTypes.Add(expenseTypeDto);
@@ -124,6 +133,53 @@ namespace budgetifyAPI.Repository.Expenses
                 expenseCategories.Add(expenseCategoryDto);
             }
             return expenseCategories;
+        }
+
+        public async Task<ExpenseTypesDto> CreateExpenseType(CreateExpenseTypeDto createExpenseType)
+        {
+            var newExpenseType = new ExpenseType
+            {
+                Name = createExpenseType.Name,
+                Description = createExpenseType.Description,
+                AddedBy = AddedBy.User,
+                UserId = _userRepo.User.Id,
+            };
+
+            _ctx.ExpenseTypes.Add(newExpenseType);
+            await _ctx.SaveChangesAsync();
+
+            return new ExpenseTypesDto
+            {
+                Id = newExpenseType.Id,
+                Name = newExpenseType.Name,
+                Description = newExpenseType.Description
+            };
+        }
+
+        public async Task<ExpenseCategoryDto> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory)
+        {
+            var expenseType = await _ctx.ExpenseTypes.FindAsync(createExpenseCategory.ExpenseTypeId);
+            var newExpenseCategory = new ExpenseCategory
+            {
+                Name = createExpenseCategory.Name,
+                Description = createExpenseCategory.Description,
+                ExpenseTypeId = createExpenseCategory.ExpenseTypeId,
+                AddedBy = AddedBy.User,
+                UserId = _userRepo.User.Id,
+                ExpenseType = expenseType
+            };
+            _ctx.ExpenseCategories.Add(newExpenseCategory);
+            await _ctx.SaveChangesAsync();
+
+            return new ExpenseCategoryDto
+            {
+                Id= newExpenseCategory.Id,
+                Name = newExpenseCategory.Name,
+                Description = newExpenseCategory.Description,
+                ExpenseTypeId = newExpenseCategory.ExpenseTypeId,
+                ExpenseTypeDescription = newExpenseCategory.ExpenseType.Description,
+                ExpenseTypeName = newExpenseCategory.ExpenseType.Name
+            };
         }
     }
 }

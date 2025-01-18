@@ -1,4 +1,5 @@
-﻿using budgetifyAPI.Models;
+﻿using budgetifyAPI.Enums;
+using budgetifyAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace budgetifyAPI.Data
@@ -9,12 +10,15 @@ namespace budgetifyAPI.Data
         {
             if (await context.Accounts.AnyAsync()) return;
             var accounts = new List<Account>
-            {
-                new Account {Name = "HDFC Bank", Description = "Salary Account", Balance= 5000},
-                new Account {Name = "ICICI Bank", Description = "Account added to KITE", Balance = 5000},
-                new Account { Name="AU Bank", Description="Investment saving account", Balance=5000},
-                new Account { Name="Amazon Pay", Description="Amazon pay wallet", Balance=5000},
-                new Account { Name="Cash", Description="Cash account", Balance=5000}
+            {                
+                new Account { 
+                    Name="Cash", 
+                    Description="Cash account", 
+                    Balance=0, 
+                    ImageUrl = "https://res.cloudinary.com/dnvc3clgi/image/upload/v1734427264/budgetify/cash.png",
+                    AddedBy=AddedBy.System, 
+                    UserId = null
+                }
             };
             context.Accounts.AddRange(accounts);
             await context.SaveChangesAsync();
@@ -25,13 +29,7 @@ namespace budgetifyAPI.Data
             if (await context.IncomeTypes.AnyAsync()) return;
             var incomeTypes = new List<IncomeType>
             {
-                new IncomeType {Name = "Initial balance", Description = "Initial Balance"},
-                new IncomeType {Name = "Salary", Description = "Monthly Salary"},
-                new IncomeType {Name = "Stock Divident", Description = "Stock dividents"},
-                new IncomeType { Name="Cash", Description="Cash received"},
-                new IncomeType { Name="Cashback", Description="Cashbacks received"},
-                new IncomeType { Name="Gift cards", Description="Gift cards"},
-                new IncomeType { Name="Loan repayment", Description="Repayment of lended money"}
+                new IncomeType {Name = "Initial balance", Description = "Initial Balance", AddedBy=AddedBy.System, UserId = null}
 
             };
             context.IncomeTypes.AddRange(incomeTypes);
@@ -104,7 +102,7 @@ namespace budgetifyAPI.Data
         public static async Task Initialize(DataContext context)
         {
             await CreateAccounts(context);
-            await CreateExpenseTypes(context);
+            //await CreateExpenseTypes(context);
             await CreateIncomeTypes(context);
 
         }

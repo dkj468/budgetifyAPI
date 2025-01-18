@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using budgetifyAPI.Data;
@@ -11,9 +12,11 @@ using budgetifyAPI.Data;
 namespace budgetifyAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250113074950_AllowCreateMasterData")]
+    partial class AllowCreateMasterData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,10 +43,12 @@ namespace budgetifyAPI.Migrations
                         .HasColumnName("balance");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<string>("ImageUrl")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("imageurl");
 
@@ -72,7 +77,7 @@ namespace budgetifyAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountId")
+                    b.Property<int>("AccountId")
                         .HasColumnType("integer")
                         .HasColumnName("accountid");
 
@@ -117,7 +122,7 @@ namespace budgetifyAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountId")
+                    b.Property<int>("AccountId")
                         .HasColumnType("integer")
                         .HasColumnName("accountid");
 
@@ -134,6 +139,7 @@ namespace budgetifyAPI.Migrations
                         .HasColumnName("dateupdated");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -170,6 +176,7 @@ namespace budgetifyAPI.Migrations
                         .HasColumnName("addedby");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -209,6 +216,7 @@ namespace budgetifyAPI.Migrations
                         .HasColumnName("addedby");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -237,7 +245,7 @@ namespace budgetifyAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountId")
+                    b.Property<int>("AccountId")
                         .HasColumnType("integer")
                         .HasColumnName("accountid");
 
@@ -254,6 +262,7 @@ namespace budgetifyAPI.Migrations
                         .HasColumnName("dateupdated");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -270,7 +279,7 @@ namespace budgetifyAPI.Migrations
                     b.ToTable("incomes");
                 });
 
-            modelBuilder.Entity("budgetifyAPI.Models.IncomeTypeDto", b =>
+            modelBuilder.Entity("budgetifyAPI.Models.IncomeType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -350,7 +359,9 @@ namespace budgetifyAPI.Migrations
                 {
                     b.HasOne("budgetifyAPI.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
                 });
@@ -359,7 +370,9 @@ namespace budgetifyAPI.Migrations
                 {
                     b.HasOne("budgetifyAPI.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("budgetifyAPI.Models.ExpenseCategory", "ExpenseCategory")
                         .WithMany()
@@ -410,9 +423,11 @@ namespace budgetifyAPI.Migrations
                 {
                     b.HasOne("budgetifyAPI.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("budgetifyAPI.Models.IncomeTypeDto", "IncomeType")
+                    b.HasOne("budgetifyAPI.Models.IncomeType", "IncomeType")
                         .WithMany()
                         .HasForeignKey("IncomeTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -423,7 +438,7 @@ namespace budgetifyAPI.Migrations
                     b.Navigation("IncomeType");
                 });
 
-            modelBuilder.Entity("budgetifyAPI.Models.IncomeTypeDto", b =>
+            modelBuilder.Entity("budgetifyAPI.Models.IncomeType", b =>
                 {
                     b.HasOne("budgetifyAPI.Models.User", "User")
                         .WithMany()

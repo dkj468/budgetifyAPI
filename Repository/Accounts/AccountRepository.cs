@@ -2,6 +2,7 @@
 using budgetifyAPI.Dtos;
 using budgetifyAPI.Enums;
 using budgetifyAPI.Models;
+using budgetifyAPI.Repository.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace budgetifyAPI.Repository.Accounts
@@ -9,9 +10,11 @@ namespace budgetifyAPI.Repository.Accounts
     public class AccountRepository : IAccountRepository
     {
         private readonly DataContext _ctx;
-        public AccountRepository(DataContext ctx)
+        private readonly IUserRepository _userRepository;
+        public AccountRepository(DataContext ctx, IUserRepository userRepository)
         {
             _ctx = ctx;
+            _userRepository = userRepository;
         }
 
         public async Task<ICollection<AccountDto>> GetAllAccounts()
@@ -50,6 +53,33 @@ namespace budgetifyAPI.Repository.Accounts
                 account.Balance -= amount;
             }
             await _ctx.SaveChangesAsync();
+        }
+
+        public async Task<AccountDto> CreateAccount(CreateAccountDto account)
+        {
+            var newAccount = new Account
+            {
+                Name = account.Name,
+                Description = account.Description,
+                Balance = account.Balance,
+                ImageUrl = account.ImageUrl,
+                AddedBy = AddedBy.User,
+                UserId = _userRepository.User.Id
+            };
+            _ctx.Accounts.Add(newAccount);
+            await _ctx.SaveChangesAsync();
+
+            var accountDto = new AccountDto
+            {
+                Id = newAccount.Id,
+                Name = newAccount.Name,
+                Description = newAccount.Description,
+                ImageUrl = newAccount.ImageUrl,
+                Balance = newAccount.Balance,
+
+            };
+            return accountDto;
+
         }
     }
 }

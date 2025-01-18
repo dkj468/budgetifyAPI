@@ -12,10 +12,12 @@ namespace budgetifyAPI.Repository.Incomes
     {
         private readonly DataContext _ctx;
         private readonly IAccountRepository _accountRepo;
-        public IncomeRepostory(DataContext ctx, IAccountRepository accountRepo)
+        private readonly IUserRepository _userRepo;
+        public IncomeRepostory(DataContext ctx, IAccountRepository accountRepo, IUserRepository userRepo)
         {
             _ctx = ctx;
             _accountRepo = accountRepo;
+            _userRepo = userRepo;
         }
 
         private AccountTransaction CreateTransaction(Account account, Income income)
@@ -55,6 +57,26 @@ namespace budgetifyAPI.Repository.Incomes
         public async Task<ICollection<IncomeType>> GetAllIncomeType()
         {
             return await _ctx.IncomeTypes.ToListAsync();
+        }
+
+        public async Task<IncomeType> CreateIncomeType(CreateIncomeTypeDto createIncomeType)
+        {
+            var newIncomeType = new IncomeType
+            {
+                Name = createIncomeType.Name,
+                Description = createIncomeType.Description,
+                AddedBy = AddedBy.User,
+                UserId = _userRepo.User.Id,
+            };
+            _ctx.IncomeTypes.Add(newIncomeType);
+            await _ctx.SaveChangesAsync();
+
+            return new IncomeType 
+                {
+                    Id = newIncomeType.Id,
+                    Name = newIncomeType.Name, 
+                    Description = newIncomeType.Description, 
+                };
         }
     }
 }
