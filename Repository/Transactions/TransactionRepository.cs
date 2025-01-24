@@ -1,5 +1,6 @@
 ﻿using budgetifyAPI.Data;
 using budgetifyAPI.Dtos;
+using budgetifyAPI.Repository.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace budgetifyAPI.Repository.Transactions
@@ -7,15 +8,18 @@ namespace budgetifyAPI.Repository.Transactions
     public class TransactionRepository : ITransactionRepository
     {
         private readonly DataContext _ctx;
-        public TransactionRepository(DataContext ctx)
+        private readonly IUserRepository _userRepo;
+        public TransactionRepository(DataContext ctx, IUserRepository userRepo)
         {
             _ctx = ctx;
+            _userRepo = userRepo;
         }
 
         public async Task<ICollection<TransactionDto>> GetAllTransactions()
         {
             var transactions = await _ctx.AccountTransactions
                                     .Include(at => at.Account)
+                                    .Where(at => at.UserId == _userRepo.User.Id)
                                     .ToListAsync();
             var ThisTransactionsList = new List<TransactionDto>();
             foreach (var transaction in transactions)

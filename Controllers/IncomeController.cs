@@ -17,8 +17,8 @@ namespace budgetifyAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateIncome(CreateIncomeDto income)
         {
-            await _incomeRepo.CreateIncome(income);
-            return Ok();
+            var newIncome = await _incomeRepo.CreateIncome(income);
+            return CreatedAtAction(nameof(CreateIncome), newIncome);
         }
 
 

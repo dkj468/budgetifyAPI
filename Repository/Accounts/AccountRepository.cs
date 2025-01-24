@@ -19,7 +19,9 @@ namespace budgetifyAPI.Repository.Accounts
 
         public async Task<ICollection<AccountDto>> GetAllAccounts()
         {
-            var data = await _ctx.Accounts.ToListAsync();
+            var data = await _ctx.Accounts
+                                .Where(a => a.UserId == _userRepository.User.Id)
+                                .ToListAsync();
             var accounts = new List<AccountDto>();
             foreach (var account in data)
             {

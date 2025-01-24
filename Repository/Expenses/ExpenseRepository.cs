@@ -29,30 +29,61 @@ namespace budgetifyAPI.Repository.Expenses
                 AccountId = expense.AccountId,
                 Amount = expense.Amount,
                 Description = expense.Description,
-                ClosingBalance = account.Balance - expense.Amount
+                ClosingBalance = account.Balance - expense.Amount,
+                UserId = _userRepo.User.Id
             };
 
             return ThisTransaction;
         }
 
-        public async Task CreateExpense(CreateExpenseDto expense)
+        public async Task<ExpenseDto> CreateExpense(CreateExpenseDto expense)
         {
             var account = await _ctx.Accounts.FindAsync(expense.AccountId);
-            var ThisExpense = new Expense
+            var newExpense = new Expense
             {
                 ExpenseCategoryId = expense.ExpenseCategoryId,
                 Amount = expense.Amount,
                 AccountId = expense.AccountId,
                 Description = expense.Description,
                 ExpenseTypeId = expense.ExpenseTypeId,
+                UserId = _userRepo.User.Id,
+
 
             };
-            _ctx.Expenses.Add(ThisExpense);
-            var ThisTransaction = CreateTransaction(account, ThisExpense);
+            var ThisTransaction = CreateTransaction(account, newExpense);
             _ctx.AccountTransactions.Add(ThisTransaction);
             // update account balance --- account is being tracked in context
             account.Balance = account.Balance - expense.Amount;
             await _ctx.SaveChangesAsync();
+
+            newExpense.Transaction = ThisTransaction;
+            _ctx.Expenses.Add(newExpense);
+            await _ctx.SaveChangesAsync();
+
+            return new ExpenseDto
+            {
+                Id = newExpense.Id,
+                DateCreated = newExpense.DateCreated,
+                DateUpdated = newExpense.DateUpdated,
+                ExpenseCategoryId = newExpense.ExpenseCategoryId,
+                ExpenseTypeId = newExpense.ExpenseTypeId,
+                Amount = newExpense.Amount,
+                Description = newExpense.Description,
+                AccountName = newExpense.Account.Name,
+                AccountId = newExpense.AccountId,
+                Transaction = new TransactionDto
+                {
+                    Id = ThisTransaction.Id,
+                    AccountId = account.Id,
+                    AccountName = account.Name,
+                    Amount = expense.Amount,
+                    ClosingBalance = ThisTransaction.ClosingBalance,
+                    Description = ThisTransaction.Description,
+                    Type = TransactionType.Expense.ToString(),
+                    DateCreated = ThisTransaction.DateCreated,
+                    DateUpdated = ThisTransaction.DateUpdated,
+                }
+            };
 
         }
 
@@ -62,6 +93,8 @@ namespace budgetifyAPI.Repository.Expenses
                 .Include(e => e.ExpenseType)
                 .Include(e => e.ExpenseCategory)
                 .Include(e => e.Account)
+                .Include(e => e.Transaction)
+                .Where(e => e.UserId == _userRepo.User.Id)
                 .ToListAsync();
             var expensesDtoList = new List<ExpenseDto>();
             foreach (var expense in expenses)
@@ -77,7 +110,7 @@ namespace budgetifyAPI.Repository.Expenses
                 thisexpense.Amount = expense.Amount;
                 thisexpense.Description = expense.Description;
                 thisexpense.AccountName = expense.Account.Name;
-                thisexpense.AccountId = expense.AccountId;
+                thisexpense.AccountId = expense.AccountId;                
                 expensesDtoList.Add(thisexpense);
             }
             return expensesDtoList;
@@ -87,6 +120,7 @@ namespace budgetifyAPI.Repository.Expenses
         {
             var data = await _ctx.ExpenseTypes
                             .Include(et => et.ExpenseCategories)
+                            .Where(et => et.UserId == _userRepo.User.Id)
                             .ToListAsync();
             var expenseTypes = new List<ExpenseTypesDto>();
             foreach (var expenseType in data)
@@ -119,6 +153,7 @@ namespace budgetifyAPI.Repository.Expenses
         {
             var data = await _ctx.ExpenseCategories
                             .Include(ec => ec.ExpenseType)
+                            .Where(ec => ec.UserId == _userRepo.User.Id)
                             .ToListAsync();
             var expenseCategories = new List<ExpenseCategoryDto>();
             foreach (var expenseCategory in data)

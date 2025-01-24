@@ -15,5 +15,6 @@ namespace budgetifyAPI.Dtos
         public DateTime DateUpdated { get; set; } = DateTime.Now;
         public int? AccountId { get; set; }
         public string AccountName { get; set; }
+        public TransactionDto? Transaction { get; set; }
     }
 }

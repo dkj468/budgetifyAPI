@@ -26,8 +26,8 @@ namespace budgetifyAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateExpense(CreateExpenseDto expense)
         {
-            await _expenseRepo.CreateExpense(expense);
-            return Ok();
+            var newExpense =  await _expenseRepo.CreateExpense(expense);
+            return CreatedAtAction (nameof(CreateExpense) ,newExpense);
         }
 
         [HttpGet("expensetypes")]

@@ -30,11 +30,12 @@ namespace budgetifyAPI.Repository.Incomes
                 Amount = income.Amount,
                 Description = income.Description,
                 ClosingBalance = account.Balance + income.Amount,
+                UserId = _userRepo.User.Id
             };
 
             return ThisTransaction;
         }
-        public async Task CreateIncome(CreateIncomeDto income)
+        public async Task<IncomeDto> CreateIncome(CreateIncomeDto income)
         {
             var account = await _ctx.Accounts.FindAsync(income.AccountId);
             var ThisIncome = new Income
@@ -43,20 +44,51 @@ namespace budgetifyAPI.Repository.Incomes
                 Amount = income.Amount,
                 AccountId = income.AccountId,
                 Description = income.Description,
+                UserId = _userRepo.User.Id
 
             };
-            _ctx.Incomes.Add(ThisIncome);
             var ThisTransaction = CreateTransaction(account, ThisIncome);
             _ctx.AccountTransactions.Add(ThisTransaction);
             // update account balance --- account is being tracked in context
             account.Balance = account.Balance + income.Amount;
+            ThisIncome.Transaction = ThisTransaction;
+
+            _ctx.Incomes.Add(ThisIncome);
             await _ctx.SaveChangesAsync();
+
+            return new IncomeDto
+            {
+                Id = ThisIncome.Id,
+                IncomeTypeId = ThisIncome.IncomeTypeId,
+                Amount = ThisIncome.Amount,
+                AccountId = account.Id,
+                Account = account.Description,
+                DateCreated = ThisIncome.DateCreated,
+                DateUpdated = ThisIncome.DateUpdated,
+                Description = ThisIncome.Description,
+                UserId = _userRepo.User.Id,
+                Transaction = new TransactionDto
+                {
+                    Id = ThisTransaction.Id,
+                    AccountId = account.Id,
+                    AccountName = account.Name,
+                    Amount = ThisIncome.Amount,
+                    ClosingBalance = ThisTransaction.ClosingBalance,
+                    DateCreated = ThisTransaction.DateCreated,
+                    DateUpdated = ThisTransaction.DateUpdated,
+                    Description = ThisTransaction.Description,
+                    Type = TransactionType.Income.ToString()
+                }
+
+            };
 
         }
 
         public async Task<ICollection<IncomeType>> GetAllIncomeType()
         {
-            return await _ctx.IncomeTypes.ToListAsync();
+            return await _ctx.IncomeTypes
+                        .Where(it => it.UserId ==  _userRepo.User.Id)
+                        .ToListAsync();
         }
 
         public async Task<IncomeType> CreateIncomeType(CreateIncomeTypeDto createIncomeType)
