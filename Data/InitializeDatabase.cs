@@ -101,9 +101,9 @@ namespace budgetifyAPI.Data
 
         public static async Task Initialize(DataContext context)
         {
-            await CreateAccounts(context);
+            //await CreateAccounts(context);
             //await CreateExpenseTypes(context);
-            await CreateIncomeTypes(context);
+            //await CreateIncomeTypes(context);
 
         }
     }

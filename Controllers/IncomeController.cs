@@ -17,6 +17,27 @@ namespace budgetifyAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateIncome(CreateIncomeDto income)
         {
+            if(income.AccountId == -1)
+            {
+                ModelState.AddModelError("accountId", "Account id is required");
+            }
+            if (income.IncomeTypeId == -1)
+            {
+                ModelState.AddModelError("incomeTypeId", "Income type id is required");
+            }
+            if (income.Amount <= 0)
+            {
+                ModelState.AddModelError("amount", "Amount must be greater than zero");
+            }
+
+            if(ModelState.ErrorCount > 0)
+            {
+                return ValidationProblem
+                (
+                    title: "Validation problem",
+                    statusCode: StatusCodes.Status400BadRequest
+                );
+            }
             var newIncome = await _incomeRepo.CreateIncome(income);
             return CreatedAtAction(nameof(CreateIncome), newIncome);
         }
