@@ -5,6 +5,7 @@ using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Accounts;
 using budgetifyAPI.Repository.Users;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Principal;
 
 namespace budgetifyAPI.Repository.Expenses
 {
@@ -39,6 +40,20 @@ namespace budgetifyAPI.Repository.Expenses
         public async Task<ExpenseDto> CreateExpense(CreateExpenseDto expense)
         {
             var account = await _ctx.Accounts.FindAsync(expense.AccountId);
+            if (account == null)
+            {
+                throw new BadHttpRequestException($"No account found with given id: {expense.AccountId}");
+            }
+            var expenseCategoryId = await _ctx.Incomes.FindAsync(expense.ExpenseCategoryId);
+            if (expenseCategoryId == null)
+            {
+                throw new BadHttpRequestException($"No expense category found with given id: {expense.ExpenseCategoryId}");
+            }
+            var expenseTypeId = await _ctx.Incomes.FindAsync(expense.ExpenseTypeId);
+            if (expenseTypeId == null)
+            {
+                throw new BadHttpRequestException($"No expense type found with given id: {expense.ExpenseTypeId}");
+            }
             var newExpense = new Expense
             {
                 ExpenseCategoryId = expense.ExpenseCategoryId,
@@ -194,6 +209,10 @@ namespace budgetifyAPI.Repository.Expenses
         public async Task<ExpenseCategoryDto> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory)
         {
             var expenseType = await _ctx.ExpenseTypes.FindAsync(createExpenseCategory.ExpenseTypeId);
+            if (expenseType == null)
+            {
+                throw new BadHttpRequestException($"No expense type found with given id: {createExpenseCategory.ExpenseTypeId}");
+            }
             var newExpenseCategory = new ExpenseCategory
             {
                 Name = createExpenseCategory.Name,

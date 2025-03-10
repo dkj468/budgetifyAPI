@@ -1,5 +1,9 @@
 ﻿using budgetifyAPI.Dtos;
+using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Incomes;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
@@ -9,35 +13,29 @@ namespace budgetifyAPI.Controllers
     public class IncomeController : ControllerBase
     {
         private readonly IIncomeRepository _incomeRepo;
-        public IncomeController(IIncomeRepository incomeRepo)
+        private readonly IValidator<CreateIncomeDto> _validatorIncome;
+        private readonly IValidator<CreateIncomeTypeDto> _validatorIncomeType;
+        public IncomeController(IIncomeRepository incomeRepo, IValidator<CreateIncomeDto> validatorIncome, IValidator<CreateIncomeTypeDto> validatorIncomeType)
         {
             _incomeRepo = incomeRepo;
+            _validatorIncome = validatorIncome;
+            _validatorIncomeType = validatorIncomeType;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateIncome(CreateIncomeDto income)
         {
-            if(income.AccountId == -1)
+            ValidationResult result = _validatorIncome.Validate(income);
+            if(!result.IsValid)
             {
-                ModelState.AddModelError("accountId", "Account id is required");
-            }
-            if (income.IncomeTypeId == -1)
-            {
-                ModelState.AddModelError("incomeTypeId", "Income type id is required");
-            }
-            if (income.Amount <= 0)
-            {
-                ModelState.AddModelError("amount", "Amount must be greater than zero");
-            }
-
-            if(ModelState.ErrorCount > 0)
-            {
+                result.AddToModelState(this.ModelState);
                 return ValidationProblem
                 (
                     title: "Validation problem",
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
+           
             var newIncome = await _incomeRepo.CreateIncome(income);
             return CreatedAtAction(nameof(CreateIncome), newIncome);
         }
@@ -54,7 +52,16 @@ namespace budgetifyAPI.Controllers
         [HttpPost("incometypes")]
         public async Task<IActionResult> CreateIncomeType(CreateIncomeTypeDto createIncomeType)
         {
-            // TODO --- Add validation for income type name
+            var result = _validatorIncomeType.Validate(createIncomeType);
+            if(!result.IsValid)
+            {
+                result.AddToModelState(this.ModelState);
+                return ValidationProblem
+                (
+                    title:"Validation problem",
+                    statusCode: StatusCodes.Status400BadRequest 
+                );
+            }
             var newIncomeType = await _incomeRepo.CreateIncomeType(createIncomeType);
             return CreatedAtAction(nameof(CreateIncomeType), newIncomeType);
         }

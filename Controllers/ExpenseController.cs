@@ -1,5 +1,8 @@
 ﻿using budgetifyAPI.Dtos;
+using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Expenses;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +14,20 @@ namespace budgetifyAPI.Controllers
     public class ExpenseController : ControllerBase
     {
         private readonly IExpenseRepository _expenseRepo;
+        private readonly IValidator<CreateExpenseDto> _validatorExpense;
+        private readonly IValidator<CreateExpenseTypeDto> _validatorExpenseType;
+        private readonly IValidator<CreateExpenseCategoryDto> _validatorExpenseCategory;
 
-        public ExpenseController(IExpenseRepository expenseRepo)
+        public ExpenseController(IExpenseRepository expenseRepo, 
+                IValidator<CreateExpenseDto> validatorExpense, 
+                IValidator<CreateExpenseTypeDto> validatorExpenseType, 
+                IValidator<CreateExpenseCategoryDto> validatorExpenseCategory)
         {
             _expenseRepo = expenseRepo;
+            _validatorExpense = validatorExpense;
+            _validatorExpenseType = validatorExpenseType;
+            _validatorExpenseCategory = validatorExpenseCategory;
+
         }
 
         [HttpGet]
@@ -26,28 +39,13 @@ namespace budgetifyAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateExpense(CreateExpenseDto expense)
         {
-            if(expense.AccountId == -1)
+            var validationRsult = _validatorExpense.Validate(expense);
+            if(!validationRsult.IsValid)
             {
-                ModelState.AddModelError("accountId", "Account is is required");
-            }
-            if(expense.ExpenseTypeId == -1)
-            {
-                ModelState.AddModelError("expenseTypeId", "Expense Type id is required");
-            }
-            if(expense.ExpenseCategoryId == -1)
-            {
-                ModelState.AddModelError("expenseCategoryId", "Expense Category Id is required");
-            }
-            if(expense.Amount <= 0)
-            {
-                ModelState.AddModelError("amount", "Amount must be greater than zero");
-            }
-
-            if(ModelState.ErrorCount > 0 )
-            {
+                validationRsult.AddToModelState(this.ModelState);
                 return ValidationProblem
                 (
-                    title: "Validation problem",
+                    title:"Validation problem",
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
@@ -64,7 +62,16 @@ namespace budgetifyAPI.Controllers
         [HttpPost("expensetypes")]
         public async Task<IActionResult> CreateExpenseType(CreateExpenseTypeDto createExpenseType)
         {
-            // TODO --- Add validation for expense type Name
+            var validationRsult = _validatorExpenseType.Validate(createExpenseType);
+            if (!validationRsult.IsValid)
+            {
+                validationRsult.AddToModelState(this.ModelState);
+                return ValidationProblem
+                (
+                    title: "Validation problem",
+                    statusCode: StatusCodes.Status400BadRequest
+                );
+            }
             var newExpenseType = await _expenseRepo.CreateExpenseType(createExpenseType);
             return CreatedAtAction(nameof(createExpenseType), newExpenseType);
         }
@@ -78,7 +85,16 @@ namespace budgetifyAPI.Controllers
         [HttpPost("expensecategory")]
         public async Task<IActionResult> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory)
         {
-            // TODO --- Add validation for expense category Name,Expense type id
+            var validationRsult = _validatorExpenseCategory.Validate(createExpenseCategory);
+            if (!validationRsult.IsValid)
+            {
+                validationRsult.AddToModelState(this.ModelState);
+                return ValidationProblem
+                (
+                    title: "Validation problem",
+                    statusCode: StatusCodes.Status400BadRequest
+                );
+            }
             var newExpenseCategory = await _expenseRepo.CreateExpenseCategory(createExpenseCategory);
             return CreatedAtAction(nameof(CreateExpenseCategory), newExpenseCategory);
         }
