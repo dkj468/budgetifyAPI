@@ -6,6 +6,8 @@ using budgetifyAPI.Repository.Incomes;
 using budgetifyAPI.Repository.Transactions;
 using budgetifyAPI.Repository.Users;
 using budgetifyAPI.Services;
+using budgetifyAPI.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -45,6 +47,9 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("budgetify"));
 });
 
+// Fluent validator
+builder.Services.AddValidatorsFromAssemblyContaining<IncomeValidator>();
+
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -52,6 +57,7 @@ builder.Services.AddScoped<IIncomeRepository, IncomeRepostory>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISignInHelper, SignInHelper>();
+
 
 // JWT authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -90,6 +96,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 
 // Configure the HTTP request pipeline.

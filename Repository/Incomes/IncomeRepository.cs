@@ -1,6 +1,7 @@
 ﻿using budgetifyAPI.Data;
 using budgetifyAPI.Dtos;
 using budgetifyAPI.Enums;
+using budgetifyAPI.Exceptions;
 using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Accounts;
 using budgetifyAPI.Repository.Users;
@@ -38,6 +39,15 @@ namespace budgetifyAPI.Repository.Incomes
         public async Task<IncomeDto> CreateIncome(CreateIncomeDto income)
         {
             var account = await _ctx.Accounts.FindAsync(income.AccountId);
+            if(account == null)
+            {
+                throw new BadHttpRequestException ($"No account found with given id: {income.AccountId}");
+            }
+            var incomeTypeId = await _ctx.Incomes.FindAsync(income.IncomeTypeId);
+            if (incomeTypeId == null)
+            {
+                throw new BadHttpRequestException($"No income type found with given id: {income.IncomeTypeId}");
+            }
             var ThisIncome = new Income
             {
                 IncomeTypeId = income.IncomeTypeId,
@@ -97,18 +107,18 @@ namespace budgetifyAPI.Repository.Incomes
             {
                 Name = createIncomeType.Name,
                 Description = createIncomeType.Description,
-                AddedBy = AddedBy.User,
+                AddedBy = AddedBy.User, // AddedBy enum
                 UserId = _userRepo.User.Id,
             };
             _ctx.IncomeTypes.Add(newIncomeType);
             await _ctx.SaveChangesAsync();
 
             return new IncomeType 
-                {
-                    Id = newIncomeType.Id,
-                    Name = newIncomeType.Name, 
-                    Description = newIncomeType.Description, 
-                };
+            {
+                Id = newIncomeType.Id,
+                Name = newIncomeType.Name, 
+                Description = newIncomeType.Description, 
+            };
         }
     }
 }
