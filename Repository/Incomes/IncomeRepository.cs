@@ -43,8 +43,8 @@ namespace budgetifyAPI.Repository.Incomes
             {
                 throw new BadHttpRequestException ($"No account found with given id: {income.AccountId}");
             }
-            var incomeTypeId = await _ctx.Incomes.FindAsync(income.IncomeTypeId);
-            if (incomeTypeId == null)
+            var incomeType = await _ctx.IncomeTypes.FindAsync(income.IncomeTypeId);
+            if (incomeType == null)
             {
                 throw new BadHttpRequestException($"No income type found with given id: {income.IncomeTypeId}");
             }

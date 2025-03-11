@@ -44,13 +44,13 @@ namespace budgetifyAPI.Repository.Expenses
             {
                 throw new BadHttpRequestException($"No account found with given id: {expense.AccountId}");
             }
-            var expenseCategoryId = await _ctx.Incomes.FindAsync(expense.ExpenseCategoryId);
-            if (expenseCategoryId == null)
+            var expenseCategory = await _ctx.ExpenseCategories.FindAsync(expense.ExpenseCategoryId);
+            if (expenseCategory == null)
             {
                 throw new BadHttpRequestException($"No expense category found with given id: {expense.ExpenseCategoryId}");
             }
-            var expenseTypeId = await _ctx.Incomes.FindAsync(expense.ExpenseTypeId);
-            if (expenseTypeId == null)
+            var expenseType = await _ctx.ExpenseTypes.FindAsync(expense.ExpenseTypeId);
+            if (expenseType == null)
             {
                 throw new BadHttpRequestException($"No expense type found with given id: {expense.ExpenseTypeId}");
             }
