@@ -1,4 +1,5 @@
 ﻿using budgetifyAPI.Dtos;
+using budgetifyAPI.Factories;
 using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Incomes;
 using FluentValidation;
@@ -13,19 +14,18 @@ namespace budgetifyAPI.Controllers
     public class IncomeController : ControllerBase
     {
         private readonly IIncomeRepository _incomeRepo;
-        private readonly IValidator<CreateIncomeDto> _validatorIncome;
-        private readonly IValidator<CreateIncomeTypeDto> _validatorIncomeType;
-        public IncomeController(IIncomeRepository incomeRepo, IValidator<CreateIncomeDto> validatorIncome, IValidator<CreateIncomeTypeDto> validatorIncomeType)
+        private readonly IValidationFactory _validationFactory;
+        public IncomeController(IIncomeRepository incomeRepo, IValidationFactory validationFactory)
         {
             _incomeRepo = incomeRepo;
-            _validatorIncome = validatorIncome;
-            _validatorIncomeType = validatorIncomeType;
+            _validationFactory = validationFactory;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateIncome(CreateIncomeDto income)
         {
-            ValidationResult result = _validatorIncome.Validate(income);
+            var validator = _validationFactory.GetValidator<CreateIncomeDto>();
+            ValidationResult result = validator.Validate(income);
             if(!result.IsValid)
             {
                 result.AddToModelState(this.ModelState);
@@ -52,7 +52,8 @@ namespace budgetifyAPI.Controllers
         [HttpPost("incometypes")]
         public async Task<IActionResult> CreateIncomeType(CreateIncomeTypeDto createIncomeType)
         {
-            var result = _validatorIncomeType.Validate(createIncomeType);
+            var validator = _validationFactory.GetValidator<CreateIncomeTypeDto>();
+            var result = validator.Validate(createIncomeType);
             if(!result.IsValid)
             {
                 result.AddToModelState(this.ModelState);

@@ -1,9 +1,7 @@
 ﻿using budgetifyAPI.Dtos;
-using budgetifyAPI.Models;
+using budgetifyAPI.Factories;
 using budgetifyAPI.Repository.Expenses;
-using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
@@ -14,19 +12,12 @@ namespace budgetifyAPI.Controllers
     public class ExpenseController : ControllerBase
     {
         private readonly IExpenseRepository _expenseRepo;
-        private readonly IValidator<CreateExpenseDto> _validatorExpense;
-        private readonly IValidator<CreateExpenseTypeDto> _validatorExpenseType;
-        private readonly IValidator<CreateExpenseCategoryDto> _validatorExpenseCategory;
+        private readonly IValidationFactory _validationFactory;
 
-        public ExpenseController(IExpenseRepository expenseRepo, 
-                IValidator<CreateExpenseDto> validatorExpense, 
-                IValidator<CreateExpenseTypeDto> validatorExpenseType, 
-                IValidator<CreateExpenseCategoryDto> validatorExpenseCategory)
+        public ExpenseController(IExpenseRepository expenseRepo, IValidationFactory validationFactory)
         {
             _expenseRepo = expenseRepo;
-            _validatorExpense = validatorExpense;
-            _validatorExpenseType = validatorExpenseType;
-            _validatorExpenseCategory = validatorExpenseCategory;
+            _validationFactory = validationFactory;
 
         }
 
@@ -39,7 +30,8 @@ namespace budgetifyAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateExpense(CreateExpenseDto expense)
         {
-            var validationRsult = _validatorExpense.Validate(expense);
+            var validator = _validationFactory.GetValidator<CreateExpenseDto>();
+            var validationRsult = validator.Validate(expense);
             if(!validationRsult.IsValid)
             {
                 validationRsult.AddToModelState(this.ModelState);
@@ -62,7 +54,8 @@ namespace budgetifyAPI.Controllers
         [HttpPost("expensetypes")]
         public async Task<IActionResult> CreateExpenseType(CreateExpenseTypeDto createExpenseType)
         {
-            var validationRsult = _validatorExpenseType.Validate(createExpenseType);
+            var validator = _validationFactory.GetValidator<CreateExpenseTypeDto>();
+            var validationRsult = validator.Validate(createExpenseType);
             if (!validationRsult.IsValid)
             {
                 validationRsult.AddToModelState(this.ModelState);
@@ -85,7 +78,8 @@ namespace budgetifyAPI.Controllers
         [HttpPost("expensecategory")]
         public async Task<IActionResult> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory)
         {
-            var validationRsult = _validatorExpenseCategory.Validate(createExpenseCategory);
+            var validator = _validationFactory.GetValidator<CreateExpenseCategoryDto>();
+            var validationRsult = validator.Validate(createExpenseCategory);
             if (!validationRsult.IsValid)
             {
                 validationRsult.AddToModelState(this.ModelState);

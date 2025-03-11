@@ -1,4 +1,5 @@
 using budgetifyAPI.Data;
+using budgetifyAPI.Factories;
 using budgetifyAPI.Middleware;
 using budgetifyAPI.Repository.Accounts;
 using budgetifyAPI.Repository.Expenses;
@@ -20,6 +21,11 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// add validation factory
+builder.Services.AddScoped<IValidationFactory, ValidationFactory>();
+// Fluent validator
+builder.Services.AddValidatorsFromAssemblyContaining<IncomeValidator>();
 
 builder.Services.AddControllers(config =>
 {
@@ -46,9 +52,6 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("budgetify"));
 });
-
-// Fluent validator
-builder.Services.AddValidatorsFromAssemblyContaining<IncomeValidator>();
 
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
