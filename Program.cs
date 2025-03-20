@@ -1,3 +1,4 @@
+using Azure.Identity;
 using budgetifyAPI.Data;
 using budgetifyAPI.Factories;
 using budgetifyAPI.Middleware;
@@ -48,9 +49,24 @@ builder.Services.AddCors(options =>
 });
 
 // Datacontext
-builder.Services.AddDbContext<DataContext>(options =>
+
+if (builder.Environment.IsProduction())
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("budgetify"));
+    builder.Configuration.AddAzureKeyVault(
+        new Uri ($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/"),
+        new DefaultAzureCredential ()
+    );
+}
+
+var connectionString = builder.Configuration["dbconnection"];
+if ( connectionString == "" )
+{
+    Console.WriteLine("Database connection string is empty");
+}
+
+builder.Services.AddDbContext<DataContext>(options =>
+{    
+    options.UseNpgsql(connectionString);
 });
 
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
