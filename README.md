@@ -1,7 +1,7 @@
 # budgetifyAPI - A .NET Core Web API for personal Budget Management
 
 ## Getting Started
-To use this project template, follow the steps below:
+To use this project, follow the steps below:
 
  1. Ensure that you have the .NET 9 SDK installed on your machine.
 2. Clone or download this repository to your local machine.
