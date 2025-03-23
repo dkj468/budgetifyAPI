@@ -1,14 +1,17 @@
 ﻿using budgetifyAPI.Dtos;
+using budgetifyAPI.Models;
 
 namespace budgetifyAPI.Repository.Expenses
 {
     public interface IExpenseRepository
     {
-        Task<ICollection<ExpenseDto>> GetAllExpenses();
-        Task<ICollection<ExpenseTypesDto>> GetAllExpenseTypes();
-        Task<ExpenseTypesDto> CreateExpenseType(CreateExpenseTypeDto createExpenseType);
-        Task<ICollection<ExpenseCategoryDto>> GetAllExpenseCategories();
-        Task<ExpenseCategoryDto> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory);
-        Task<ExpenseDto> CreateExpense(CreateExpenseDto expense);
+        Task<ICollection<Expense>> GetAllExpenses ();
+        Task<ICollection<ExpenseType>> GetAllExpenseTypes ();
+        Task CreateExpenseType (ExpenseType expenseType, bool IsSave = true);
+        Task<ICollection<ExpenseCategory>> GetAllExpenseCategories ();
+        Task CreateExpenseCategory (ExpenseCategory expenseCategory, bool IsSave = true);
+        Task<ExpenseCategory> GetExpenseCategoryById (int id);
+        Task<ExpenseType> GetExpenseTypeById (int id);
+        Task CreateExpense (Expense expense, bool IsSave = true);
     }
 }

@@ -76,6 +76,8 @@ builder.Services.AddScoped<IIncomeRepository, IncomeRepostory>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISignInHelper, SignInHelper>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 
 // JWT authentication
