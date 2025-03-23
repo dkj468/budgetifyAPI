@@ -4,6 +4,8 @@ using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Accounts;
 using budgetifyAPI.Repository.Expenses;
 using budgetifyAPI.Repository.Users;
+using Microsoft.AspNetCore.Identity;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace budgetifyAPI.Services
 {
@@ -11,10 +13,37 @@ namespace budgetifyAPI.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private ILogger<ExpenseService> _logger;
-        public ExpenseService(IUnitOfWork unitOfWork, ILogger<ExpenseService> logger)
+        private readonly IExpenseRepository _expenseRepo;
+        private readonly IUserRepository _userRepo;
+        public ExpenseService(IUnitOfWork unitOfWork, ILogger<ExpenseService> logger, IExpenseRepository expenseRepository, IUserRepository userRepository)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _expenseRepo = expenseRepository;
+            _userRepo = userRepository;
+        }
+
+        public async Task<ICollection<ExpenseDto>> GetAllExpenses()
+        {
+            var expenses = await _expenseRepo.GetAllExpenses();
+            var expensesDtoList = new List<ExpenseDto>();
+            foreach (var expense in expenses)
+            {
+                var thisexpense = new ExpenseDto();
+                thisexpense.Id = expense.Id;
+                thisexpense.DateCreated = expense.DateCreated;
+                thisexpense.DateCreated = expense.DateCreated;
+                thisexpense.ExpenseCategoryId = expense.ExpenseCategoryId;
+                thisexpense.ExpenseTypeId = expense.ExpenseTypeId;
+                thisexpense.ExpenseType = expense.ExpenseType.Name;
+                thisexpense.ExpenseCategory = expense.ExpenseCategory.Name;
+                thisexpense.Amount = expense.Amount;
+                thisexpense.Description = expense.Description;
+                thisexpense.AccountName = expense.Account.Name;
+                thisexpense.AccountId = expense.AccountId;
+                expensesDtoList.Add(thisexpense);
+            }
+            return expensesDtoList;
         }
 
         private AccountTransaction CreateTransaction(Account account, Expense expense)
@@ -103,29 +132,103 @@ namespace budgetifyAPI.Services
             return null;
         }
 
-        public Task<ExpenseCategoryDto> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory)
+        public async Task<ExpenseCategoryDto> CreateExpenseCategory (CreateExpenseCategoryDto expenseCategory)
         {
-            throw new NotImplementedException();
+            var expenseType = await _expenseRepo.GetExpenseTypeById (expenseCategory.ExpenseTypeId);
+            if (expenseType == null)
+            {
+                throw new BadHttpRequestException($"No expense type found with given id: {expenseCategory.ExpenseTypeId}");
+            }
+
+            var newExpenseCategory = new ExpenseCategory
+            {
+                Name = expenseCategory.Name,
+                Description = expenseCategory.Description,
+                ExpenseTypeId = expenseCategory.ExpenseTypeId,
+                AddedBy = AddedBy.User,
+                UserId = _userRepo.User.Id,
+                ExpenseType = expenseType
+            };
+
+            await _expenseRepo.CreateExpenseCategory(newExpenseCategory);
+
+            return new ExpenseCategoryDto
+            {
+                Id = newExpenseCategory.Id,
+                Name = newExpenseCategory.Name,
+                Description = newExpenseCategory.Description,
+                ExpenseTypeId = newExpenseCategory.ExpenseTypeId,
+                ExpenseTypeDescription = newExpenseCategory.ExpenseType.Description,
+                ExpenseTypeName = newExpenseCategory.ExpenseType.Name
+            };
         }
 
-        public Task<ExpenseTypesDto> CreateExpenseType(CreateExpenseTypeDto createExpenseType)
+        public async Task<ExpenseTypesDto> CreateExpenseType (CreateExpenseTypeDto expenseTypeDto)
         {
-            throw new NotImplementedException();
+            var newExpenseType = new ExpenseType
+            {
+                Name = expenseTypeDto.Name,
+                Description = expenseTypeDto.Description,
+                AddedBy = AddedBy.User,
+                UserId = _userRepo.User.Id,
+            };
+
+            await _expenseRepo.CreateExpenseType(newExpenseType);
+
+            return new ExpenseTypesDto
+            {
+                Id = newExpenseType.Id,
+                Name = newExpenseType.Name,
+                Description = newExpenseType.Description
+            };
         }
 
-        public Task<ICollection<ExpenseCategoryDto>> GetAllExpenseCategories()
+        public async Task<ICollection<ExpenseCategoryDto>> GetAllExpenseCategories()
         {
-            throw new NotImplementedException();
-        }
+            var data = await _expenseRepo.GetAllExpenseCategories();
+            var expenseCategories = new List<ExpenseCategoryDto>();
+            foreach (var expenseCategory in data)
+            {
+                var expenseCategoryDto = new ExpenseCategoryDto();
+                expenseCategoryDto.Id = expenseCategory.Id;
+                expenseCategoryDto.Name = expenseCategory.Name;
+                expenseCategoryDto.Description = expenseCategory.Description;
+                expenseCategoryDto.ExpenseTypeDescription = expenseCategory.ExpenseType.Description;
+                expenseCategoryDto.ExpenseTypeName = expenseCategory.ExpenseType.Name;
+                expenseCategoryDto.ExpenseTypeId = expenseCategory.ExpenseType.Id;
+                expenseCategories.Add(expenseCategoryDto);
+            }
+            return expenseCategories;
+        }     
 
-        public Task<ICollection<ExpenseDto>> GetAllExpenses()
+        public async Task<ICollection<ExpenseTypesDto>> GetAllExpenseTypes()
         {
-            throw new NotImplementedException();
-        }
+            var data = await _expenseRepo.GetAllExpenseTypes();
+            var expenseTypes = new List<ExpenseTypesDto>();
+            foreach (var expenseType in data)
+            {
+                var expenseTypeDto = new ExpenseTypesDto();
+                expenseTypeDto.Id = expenseType.Id;
+                expenseTypeDto.Name = expenseType.Name;
+                expenseTypeDto.Description = expenseType.Description;
+                expenseTypeDto.ExpenseCategories = new List<ExpenseCategoryDto>();
+                foreach (var category in expenseType.ExpenseCategories)
+                {
+                    var expenseCategoryDto = new ExpenseCategoryDto();
+                    expenseCategoryDto.Id = category.Id;
+                    expenseCategoryDto.Name = category.Name;
+                    expenseCategoryDto.Description = category.Description;
+                    expenseCategoryDto.ExpenseTypeDescription = expenseType.Description;
+                    expenseCategoryDto.ExpenseTypeName = expenseType.Name;
+                    expenseCategoryDto.ExpenseTypeId = expenseType.Id;
 
-        public Task<ICollection<ExpenseTypesDto>> GetAllExpenseTypes()
-        {
-            throw new NotImplementedException();
+
+                    expenseTypeDto.ExpenseCategories.Add(expenseCategoryDto);
+                }
+                expenseTypes.Add(expenseTypeDto);
+            }
+
+            return expenseTypes;
         }
     }
 }

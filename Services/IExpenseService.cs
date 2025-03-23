@@ -6,9 +6,9 @@ namespace budgetifyAPI.Services
     {
         Task<ICollection<ExpenseDto>> GetAllExpenses();
         Task<ICollection<ExpenseTypesDto>> GetAllExpenseTypes();
-        Task<ExpenseTypesDto> CreateExpenseType(CreateExpenseTypeDto createExpenseType);
+        Task<ExpenseTypesDto> CreateExpenseType (CreateExpenseTypeDto expenseTypeDto);
         Task<ICollection<ExpenseCategoryDto>> GetAllExpenseCategories();
-        Task<ExpenseCategoryDto> CreateExpenseCategory(CreateExpenseCategoryDto createExpenseCategory);
+        Task<ExpenseCategoryDto> CreateExpenseCategory (CreateExpenseCategoryDto expenseCategory);
         Task<ExpenseDto?> CreateExpense(CreateExpenseDto expense);
     }
 }

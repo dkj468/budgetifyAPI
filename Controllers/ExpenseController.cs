@@ -11,14 +11,12 @@ namespace budgetifyAPI.Controllers
     //[Authorize]
     [Route("[controller]")]
     public class ExpenseController : ControllerBase
-    {
-        private readonly IExpenseRepository _expenseRepo;
+    {        
         private readonly IValidationFactory _validationFactory;
         private readonly IExpenseService _expenseService;
 
-        public ExpenseController(IExpenseRepository expenseRepo, IExpenseService expenseService, IValidationFactory validationFactory)
-        {
-            _expenseRepo = expenseRepo;
+        public ExpenseController(IExpenseService expenseService, IValidationFactory validationFactory)
+        {           
             _validationFactory = validationFactory;
             _expenseService = expenseService;
         }
@@ -26,7 +24,7 @@ namespace budgetifyAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllExpenses()
         {
-            return Ok(await _expenseRepo.GetAllExpenses());
+            return Ok(await _expenseService.GetAllExpenses());
         }
 
         [HttpPost]
@@ -50,7 +48,7 @@ namespace budgetifyAPI.Controllers
         [HttpGet("expensetypes")]
         public async Task<IActionResult> GetAllExpenseTypes()
         {
-            return Ok(await _expenseRepo.GetAllExpenseTypes());
+            return Ok(await _expenseService.GetAllExpenseTypes());
         }
 
         [HttpPost("expensetypes")]
@@ -67,14 +65,14 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-            var newExpenseType = await _expenseRepo.CreateExpenseType(createExpenseType);
+            var newExpenseType = await _expenseService.CreateExpenseType(createExpenseType);
             return CreatedAtAction(nameof(createExpenseType), newExpenseType);
         }
 
         [HttpGet("expensecategory")]
         public async Task<IActionResult> GetAllExpenseCategories()
         {
-            return Ok(await _expenseRepo.GetAllExpenseCategories());
+            return Ok(await _expenseService.GetAllExpenseCategories());
         }
 
         [HttpPost("expensecategory")]
@@ -91,7 +89,7 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-            var newExpenseCategory = await _expenseRepo.CreateExpenseCategory(createExpenseCategory);
+            var newExpenseCategory = await _expenseService.CreateExpenseCategory (createExpenseCategory);
             return CreatedAtAction(nameof(CreateExpenseCategory), newExpenseCategory);
         }
     }
