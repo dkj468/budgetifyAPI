@@ -11,95 +11,21 @@ namespace budgetifyAPI.Repository.Expenses
 {
     public class ExpenseRepository : IExpenseRepository
     {
-        private readonly DataContext _ctx;
-        private readonly IAccountRepository _accountRepo;
+        private readonly DataContext _ctx;       
         private readonly IUserRepository _userRepo;
-        public ExpenseRepository(DataContext ctx, IAccountRepository accountRepo
-            , IUserRepository userRepo)
+        public ExpenseRepository(DataContext ctx, IUserRepository userRepo)
         {
-            _ctx = ctx;
-            _accountRepo = accountRepo;
+            _ctx = ctx;          
             _userRepo = userRepo;
         }
 
-        private AccountTransaction CreateTransaction(Account account, Expense expense)
+        public async Task CreateExpense (Expense expense, bool IsSave = true)
         {
-            var ThisTransaction = new AccountTransaction
+            _ctx.Expenses.Add(expense);
+            if (IsSave)
             {
-                Type = TransactionType.Expense,
-                AccountId = expense.AccountId,
-                Amount = expense.Amount,
-                Description = expense.Description,
-                ClosingBalance = account.Balance - expense.Amount,
-                UserId = _userRepo.User.Id
-            };
-
-            return ThisTransaction;
-        }
-
-        public async Task<ExpenseDto> CreateExpense(CreateExpenseDto expense)
-        {
-            var account = await _ctx.Accounts.FindAsync(expense.AccountId);
-            if (account == null)
-            {
-                throw new BadHttpRequestException($"No account found with given id: {expense.AccountId}");
+                await _ctx.SaveChangesAsync();
             }
-            var expenseCategory = await _ctx.ExpenseCategories.FindAsync(expense.ExpenseCategoryId);
-            if (expenseCategory == null)
-            {
-                throw new BadHttpRequestException($"No expense category found with given id: {expense.ExpenseCategoryId}");
-            }
-            var expenseType = await _ctx.ExpenseTypes.FindAsync(expense.ExpenseTypeId);
-            if (expenseType == null)
-            {
-                throw new BadHttpRequestException($"No expense type found with given id: {expense.ExpenseTypeId}");
-            }
-            var newExpense = new Expense
-            {
-                ExpenseCategoryId = expense.ExpenseCategoryId,
-                Amount = expense.Amount,
-                AccountId = expense.AccountId,
-                Description = expense.Description,
-                ExpenseTypeId = expense.ExpenseTypeId,
-                UserId = _userRepo.User.Id,
-
-
-            };
-            var ThisTransaction = CreateTransaction(account, newExpense);
-            _ctx.AccountTransactions.Add(ThisTransaction);
-            // update account balance --- account is being tracked in context
-            account.Balance = account.Balance - expense.Amount;
-            await _ctx.SaveChangesAsync();
-
-            newExpense.Transaction = ThisTransaction;
-            _ctx.Expenses.Add(newExpense);
-            await _ctx.SaveChangesAsync();
-
-            return new ExpenseDto
-            {
-                Id = newExpense.Id,
-                DateCreated = newExpense.DateCreated,
-                DateUpdated = newExpense.DateUpdated,
-                ExpenseCategoryId = newExpense.ExpenseCategoryId,
-                ExpenseTypeId = newExpense.ExpenseTypeId,
-                Amount = newExpense.Amount,
-                Description = newExpense.Description,
-                AccountName = newExpense.Account.Name,
-                AccountId = newExpense.AccountId,
-                Transaction = new TransactionDto
-                {
-                    Id = ThisTransaction.Id,
-                    AccountId = account.Id,
-                    AccountName = account.Name,
-                    Amount = expense.Amount,
-                    ClosingBalance = ThisTransaction.ClosingBalance,
-                    Description = ThisTransaction.Description,
-                    Type = TransactionType.Expense.ToString(),
-                    DateCreated = ThisTransaction.DateCreated,
-                    DateUpdated = ThisTransaction.DateUpdated,
-                }
-            };
-
         }
 
         public async Task<ICollection<ExpenseDto>> GetAllExpenses()
@@ -234,6 +160,16 @@ namespace budgetifyAPI.Repository.Expenses
                 ExpenseTypeDescription = newExpenseCategory.ExpenseType.Description,
                 ExpenseTypeName = newExpenseCategory.ExpenseType.Name
             };
+        }
+
+        public async Task<ExpenseCategory> GetExpenseCategoryById(int id)
+        {
+            return await _ctx.ExpenseCategories.FindAsync(id);
+        }
+
+        public async Task<ExpenseType> GetExpenseTypeById(int id)
+        {
+            return await _ctx.ExpenseTypes.FindAsync(id);
         }
     }
 }

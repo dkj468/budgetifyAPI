@@ -1,5 +1,6 @@
 ﻿using budgetifyAPI.Data;
 using budgetifyAPI.Dtos;
+using budgetifyAPI.Models;
 using budgetifyAPI.Repository.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,6 +41,15 @@ namespace budgetifyAPI.Repository.Transactions
             }
 
             return ThisTransactionsList;
+        }
+
+        public async Task CreateNewTransaction (AccountTransaction accountTransaction, bool IsSave = true)
+        {
+            _ctx.AccountTransactions.Add (accountTransaction);
+            if (IsSave)
+            {
+                await _ctx.SaveChangesAsync ();
+            }
         }
     }
 }

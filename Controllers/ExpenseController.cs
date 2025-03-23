@@ -1,6 +1,7 @@
 ﻿using budgetifyAPI.Dtos;
 using budgetifyAPI.Factories;
 using budgetifyAPI.Repository.Expenses;
+using budgetifyAPI.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,12 +14,13 @@ namespace budgetifyAPI.Controllers
     {
         private readonly IExpenseRepository _expenseRepo;
         private readonly IValidationFactory _validationFactory;
+        private readonly IExpenseService _expenseService;
 
-        public ExpenseController(IExpenseRepository expenseRepo, IValidationFactory validationFactory)
+        public ExpenseController(IExpenseRepository expenseRepo, IExpenseService expenseService, IValidationFactory validationFactory)
         {
             _expenseRepo = expenseRepo;
             _validationFactory = validationFactory;
-
+            _expenseService = expenseService;
         }
 
         [HttpGet]
@@ -41,7 +43,7 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-            var newExpense =  await _expenseRepo.CreateExpense(expense);
+            var newExpense =  await _expenseService.CreateExpense (expense);
             return CreatedAtAction (nameof(CreateExpense) ,newExpense);
         }
 
