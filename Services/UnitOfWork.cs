@@ -2,6 +2,7 @@
 using budgetifyAPI.Data;
 using budgetifyAPI.Repository.Accounts;
 using budgetifyAPI.Repository.Expenses;
+using budgetifyAPI.Repository.Incomes;
 using budgetifyAPI.Repository.Transactions;
 using budgetifyAPI.Repository.Users;
 using System.Collections.Frozen;
@@ -12,14 +13,23 @@ namespace budgetifyAPI.Services
     {
         private readonly DataContext _ctx;
         public IExpenseRepository expenseRepo { get;  }
-        public  IAccountRepository accountRepo { get; }
+        public IIncomeRepository incomeRepo { get; }
+        public IAccountRepository accountRepo { get; }
         public  IUserRepository userRepo { get; }
-        public ITransactionRepository transactionRepo { get; }        
+        public ITransactionRepository transactionRepo { get; }
 
-        public UnitOfWork(DataContext context, IExpenseRepository expenseRepository,IAccountRepository accountRepository, IUserRepository userRepository, ITransactionRepository transactionRepository)
+
+        public UnitOfWork (DataContext context, 
+                IExpenseRepository expenseRepository,
+                IAccountRepository accountRepository, 
+                IUserRepository userRepository, 
+                ITransactionRepository transactionRepository,
+                IIncomeRepository incomeRepository
+            )
         {
             _ctx = context;
             expenseRepo = expenseRepository;
+            incomeRepo = incomeRepository;
             accountRepo = accountRepository;
             userRepo = userRepository;
             transactionRepo = transactionRepository;
