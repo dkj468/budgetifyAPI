@@ -36,62 +36,13 @@ namespace budgetifyAPI.Repository.Incomes
 
             return ThisTransaction;
         }
-        public async Task<IncomeDto> CreateIncome(CreateIncomeDto income)
+        public async Task CreateIncome(Income income, bool IsSave = true)
         {
-            var account = await _ctx.Accounts.FindAsync(income.AccountId);
-            if(account == null)
+            _ctx.Incomes.Add(income);
+            if (IsSave)
             {
-                throw new BadHttpRequestException ($"No account found with given id: {income.AccountId}");
-            }
-            var incomeType = await _ctx.IncomeTypes.FindAsync(income.IncomeTypeId);
-            if (incomeType == null)
-            {
-                throw new BadHttpRequestException($"No income type found with given id: {income.IncomeTypeId}");
-            }
-            var ThisIncome = new Income
-            {
-                IncomeTypeId = income.IncomeTypeId,
-                Amount = income.Amount,
-                AccountId = income.AccountId,
-                Description = income.Description,
-                UserId = _userRepo.User.Id
-
-            };
-            var ThisTransaction = CreateTransaction(account, ThisIncome);
-            _ctx.AccountTransactions.Add(ThisTransaction);
-            // update account balance --- account is being tracked in context
-            account.Balance = account.Balance + income.Amount;
-            ThisIncome.Transaction = ThisTransaction;
-
-            _ctx.Incomes.Add(ThisIncome);
-            await _ctx.SaveChangesAsync();
-
-            return new IncomeDto
-            {
-                Id = ThisIncome.Id,
-                IncomeTypeId = ThisIncome.IncomeTypeId,
-                Amount = ThisIncome.Amount,
-                AccountId = account.Id,
-                Account = account.Description,
-                DateCreated = ThisIncome.DateCreated,
-                DateUpdated = ThisIncome.DateUpdated,
-                Description = ThisIncome.Description,
-                UserId = _userRepo.User.Id,
-                Transaction = new TransactionDto
-                {
-                    Id = ThisTransaction.Id,
-                    AccountId = account.Id,
-                    AccountName = account.Name,
-                    Amount = ThisIncome.Amount,
-                    ClosingBalance = ThisTransaction.ClosingBalance,
-                    DateCreated = ThisTransaction.DateCreated,
-                    DateUpdated = ThisTransaction.DateUpdated,
-                    Description = ThisTransaction.Description,
-                    Type = TransactionType.Income.ToString()
-                }
-
-            };
-
+                await _ctx.SaveChangesAsync();
+            }                       
         }
 
         public async Task<ICollection<IncomeType>> GetAllIncomeType()
@@ -101,24 +52,18 @@ namespace budgetifyAPI.Repository.Incomes
                         .ToListAsync();
         }
 
-        public async Task<IncomeType> CreateIncomeType(CreateIncomeTypeDto createIncomeType)
+        public async Task CreateIncomeType(IncomeType incomeType, bool IsSave = true)
         {
-            var newIncomeType = new IncomeType
+            _ctx.IncomeTypes.Add (incomeType);
+            if (IsSave)
             {
-                Name = createIncomeType.Name,
-                Description = createIncomeType.Description,
-                AddedBy = AddedBy.User, // AddedBy enum
-                UserId = _userRepo.User.Id,
-            };
-            _ctx.IncomeTypes.Add(newIncomeType);
-            await _ctx.SaveChangesAsync();
+                await _ctx.SaveChangesAsync();
+            }
+        }
 
-            return new IncomeType 
-            {
-                Id = newIncomeType.Id,
-                Name = newIncomeType.Name, 
-                Description = newIncomeType.Description, 
-            };
+        public async Task<IncomeType> GetIncomeTypeById(int id)
+        {
+           return await _ctx.IncomeTypes.FindAsync (id);
         }
     }
 }
