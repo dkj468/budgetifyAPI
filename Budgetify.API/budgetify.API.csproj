@@ -27,6 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\budgetify.Application\budgetify.Application.csproj" />
+    <ProjectReference Include="..\budgetify.Persistence\budgetify.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Update="appsettings.Production.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
