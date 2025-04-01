@@ -1,13 +1,10 @@
 using Azure.Identity;
-using budgetifyAPI.Data;
+using budgetify.Application.Repositories;
+using budgetify.Infrastructure.Extensions;
+using budgetify.Persistence.Contexts;
+using budgetify.Persistence.Extensions;
 using budgetifyAPI.Factories;
 using budgetifyAPI.Middleware;
-using budgetifyAPI.Repository.Accounts;
-using budgetifyAPI.Repository.Expenses;
-using budgetifyAPI.Repository.Incomes;
-using budgetifyAPI.Repository.Transactions;
-using budgetifyAPI.Repository.Users;
-using budgetifyAPI.Services;
 using budgetifyAPI.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -64,21 +61,9 @@ if ( connectionString == "" )
     Console.WriteLine("Database connection string is empty");
 }
 
-builder.Services.AddDbContext<DataContext>(options =>
-{    
-    options.UseNpgsql(connectionString);
-});
-
-builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddScoped<IIncomeRepository, IncomeRepostory>();
-builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ISignInHelper, SignInHelper>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IExpenseService, ExpenseService>();
-builder.Services.AddScoped<IIncomeService, IncomeService>();
+builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration["JwtTokenKey"]);
 
 
 // JWT authentication
@@ -144,7 +129,7 @@ var logger = services.GetRequiredService<ILogger<Program>>();
 try
 {
     await context.Database.MigrateAsync();
-    await InitializeDatabase.Initialize(context);
+    //await InitializeDatabase.Initialize(context);
 }
 catch(Exception ex)
 {

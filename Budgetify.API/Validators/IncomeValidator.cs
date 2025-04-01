@@ -1,5 +1,4 @@
-﻿using budgetifyAPI.Dtos;
-using budgetifyAPI.Models;
+﻿using budgetify.Application.Dtos;
 using FluentValidation;
 
 namespace budgetifyAPI.Validators

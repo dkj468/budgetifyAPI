@@ -1,8 +1,8 @@
-﻿using budgetifyAPI.Dtos;
+﻿using budgetify.Application.Areas.Expenses;
+using budgetify.Application.Dtos;
 using budgetifyAPI.Factories;
-using budgetifyAPI.Repository.Expenses;
-using budgetifyAPI.Services;
 using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
@@ -13,18 +13,19 @@ namespace budgetifyAPI.Controllers
     public class ExpenseController : ControllerBase
     {        
         private readonly IValidationFactory _validationFactory;
-        private readonly IExpenseService _expenseService;
+        private readonly IMediator _mediator;
 
-        public ExpenseController(IExpenseService expenseService, IValidationFactory validationFactory)
+        public ExpenseController(IValidationFactory validationFactory, IMediator mediator)
         {           
             _validationFactory = validationFactory;
-            _expenseService = expenseService;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllExpenses()
         {
-            return Ok(await _expenseService.GetAllExpenses());
+            var data = await _mediator.Send(new GetAllExpenses.Query());
+            return Ok(data);
         }
 
         [HttpPost]
@@ -41,14 +42,14 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-            var newExpense =  await _expenseService.CreateExpense (expense);
+            var newExpense = await _mediator.Send(new CreateExpense.Request { expense = expense });
             return CreatedAtAction (nameof(CreateExpense) ,newExpense);
         }
 
         [HttpGet("expensetypes")]
         public async Task<IActionResult> GetAllExpenseTypes()
         {
-            return Ok(await _expenseService.GetAllExpenseTypes());
+            return Ok(await _mediator.Send (new GetAllExpenseType.Query()));
         }
 
         [HttpPost("expensetypes")]
@@ -65,14 +66,14 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-            var newExpenseType = await _expenseService.CreateExpenseType(createExpenseType);
+            var newExpenseType = await _mediator.Send (new CreateExpenseType.Command { expenseType = createExpenseType });
             return CreatedAtAction(nameof(createExpenseType), newExpenseType);
         }
 
         [HttpGet("expensecategory")]
         public async Task<IActionResult> GetAllExpenseCategories()
         {
-            return Ok(await _expenseService.GetAllExpenseCategories());
+            return Ok(await _mediator.Send (new GetAllExpenseCategories.Query ()));
         }
 
         [HttpPost("expensecategory")]
@@ -89,7 +90,7 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-            var newExpenseCategory = await _expenseService.CreateExpenseCategory (createExpenseCategory);
+            var newExpenseCategory = await _mediator.Send (new CreateExpenseCategory.Command { expenseCategory = createExpenseCategory });
             return CreatedAtAction(nameof(CreateExpenseCategory), newExpenseCategory);
         }
     }

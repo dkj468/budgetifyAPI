@@ -1,11 +1,10 @@
-﻿using budgetifyAPI.Dtos;
+﻿using budgetify.Application.Areas.Incomes;
+using budgetify.Application.Dtos;
 using budgetifyAPI.Factories;
-using budgetifyAPI.Models;
-using budgetifyAPI.Repository.Incomes;
 using budgetifyAPI.Services;
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
@@ -14,11 +13,11 @@ namespace budgetifyAPI.Controllers
     [Route("[controller]")]
     public class IncomeController : ControllerBase
     {
-        private readonly IIncomeService _incomeService;
+        private readonly IMediator _mediator;
         private readonly IValidationFactory _validationFactory;
-        public IncomeController(IIncomeService incomeService,IValidationFactory validationFactory)
+        public IncomeController(IValidationFactory validationFactory, IMediator mediator)
         {
-            _incomeService = incomeService;
+            _mediator = mediator;
             _validationFactory = validationFactory;
         }
 
@@ -36,8 +35,7 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-           
-            var newIncome = await _incomeService.CreateIncome(income);
+            var newIncome = await _mediator.Send (new CreateIncome.Command { income = income });
             return CreatedAtAction(nameof(CreateIncome), newIncome);
         }
 
@@ -45,7 +43,7 @@ namespace budgetifyAPI.Controllers
         [HttpGet("incometypes")]
         public async Task<IActionResult> GetAllIncomeTypes()
         {
-            var data = await _incomeService.GetAllIncomeType();
+            var data = await _mediator.Send(new GetAllIncomeTypes.Query());
             return Ok(data);
         }
 
@@ -64,7 +62,7 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest 
                 );
             }
-            var newIncomeType = await _incomeService.CreateIncomeType (createIncomeType);
+            var newIncomeType = await _mediator.Send(new CreateIncomeType.Command { incomeType = createIncomeType });
             return CreatedAtAction(nameof(CreateIncomeType), newIncomeType);
         }
 

@@ -1,4 +1,6 @@
-﻿using budgetifyAPI.Repository.Transactions;
+﻿using budgetify.Application.Areas.Transactions;
+using budgetifyAPI.Repository.Transactions;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
@@ -7,16 +9,16 @@ namespace budgetifyAPI.Controllers
     [Route("[controller]")]
     public class TransactionController : ControllerBase
     {
-        private readonly ITransactionRepository _transactionRepo;
-        public TransactionController(ITransactionRepository transactionRepo)
+        private readonly IMediator _mediator;
+        public TransactionController(IMediator mediator)
         {
-            _transactionRepo = transactionRepo;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllTransactions()
         {
-            var transactions = await _transactionRepo.GetAllTransactions();
+            var transactions = await _mediator.Send(new GetAllTransaction.Query());
             return Ok(transactions);
         }
     }

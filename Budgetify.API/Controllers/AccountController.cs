@@ -1,5 +1,6 @@
-﻿using budgetifyAPI.Dtos;
-using budgetifyAPI.Repository.Accounts;
+﻿using budgetify.Application.Areas.Accounts;
+using budgetify.Application.Dtos;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace budgetifyAPI.Controllers
@@ -8,16 +9,16 @@ namespace budgetifyAPI.Controllers
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountRepository _accountRepo;
-        public AccountController(IAccountRepository accountRepo)
+        private readonly IMediator _mediator;
+        public AccountController(IMediator mediator)
         {
-            _accountRepo = accountRepo;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAccounst()
         {
-            var data = await _accountRepo.GetAllAccounts();
+            var data = await _mediator.Send(new GetAllAccounts.Query());
             return Ok(data);
         }
 
@@ -37,8 +38,7 @@ namespace budgetifyAPI.Controllers
                     statusCode: StatusCodes.Status400BadRequest
                 );
             }
-
-            var createdAccount = await _accountRepo.CreateAccount(createAccountDto);
+            var createdAccount = await _mediator.Send (new CreateAccount.Command { account = createAccountDto});
             return CreatedAtAction(nameof(CreateAccount), createdAccount);
         }
     }

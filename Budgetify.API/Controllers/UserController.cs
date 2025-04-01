@@ -1,12 +1,8 @@
-﻿using budgetifyAPI.Data;
-using budgetifyAPI.Dtos;
-using budgetifyAPI.Models;
-using budgetifyAPI.Repository.Users;
-using budgetifyAPI.Services;
+﻿using budgetify.Application.Areas.Users;
+using budgetify.Application.Dtos;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace budgetifyAPI.Controllers
 {
@@ -14,14 +10,10 @@ namespace budgetifyAPI.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepo;
-        private readonly ISignInHelper _signInHelper;
-        private readonly TokenService _tokenService;
-        public UserController(IUserRepository userRepo, ISignInHelper signInHelper, TokenService tokenService)
+        private readonly IMediator _mediator;
+        public UserController(IMediator mediator)
         {
-            _userRepo = userRepo;
-            _signInHelper = signInHelper;
-            _tokenService = tokenService;
+            _mediator = mediator;
         }
 
         [AllowAnonymous]
@@ -29,35 +21,18 @@ namespace budgetifyAPI.Controllers
         public async Task<IActionResult> Login (LoginUserDto loginUserDto)
         {
             // get user from database
-            var user = await _userRepo.GetUserByEmail(loginUserDto.Email);
+            var user = await _mediator.Send(new LoginUser.Command { user = loginUserDto });
             if (user == null)
             {
                 return ValidationProblem(
                    title: "Authentication error",
-                   detail: "cannot find user with given email id",
+                   detail: "cannot find user with given email and password",
                    statusCode: StatusCodes.Status401Unauthorized
                );
-            }
-            // verify if password is correct
-            if (!_signInHelper.VerifyPassword (user, user.Password, loginUserDto.Password))
-            {
-                return ValidationProblem(
-                    title:"Authentication error",
-                    detail:"Password is not correct",
-                    statusCode: StatusCodes.Status401Unauthorized
-                );
-            }
+            }            
 
-            // create new token 
-            // create token
-            var userDto = new UserDto
-            {
-                DisplayName = user.DisplayName,
-                Email = user.Email,
-                Token = _tokenService.CreateToken(user)
-            };
             // send user details
-            return Ok(userDto);
+            return Ok(user);
         }
 
         [AllowAnonymous]
@@ -65,7 +40,7 @@ namespace budgetifyAPI.Controllers
         public async Task<IActionResult> RegisterUser(RegisterUserDto registerUserDto)
         {
             // verify if email is not already exists
-            var user = await _userRepo.GetUserByEmail(registerUserDto.Email);
+            var user = await _mediator.Send(new RegisterUser.Command { user = registerUserDto });
             if (user != null)
             {
                 ModelState.AddModelError("email", "This email is already taken");
@@ -86,39 +61,15 @@ namespace budgetifyAPI.Controllers
                     statusCode : StatusCodes.Status400BadRequest
                 );
             }
-
-            // create new user object
-            var newUser = new User
-            {
-                DisplayName = registerUserDto.Name,
-                Email = registerUserDto.Email,
-            };
-            newUser.Password = _signInHelper.GeneratePassword(newUser, registerUserDto.Password);
-            // create token
-            var userDto = new UserDto
-            {
-                DisplayName = newUser.DisplayName,
-                Email = newUser.Email,
-                Token = _tokenService.CreateToken(newUser)
-            };
-
-            // save user in database
-            await _userRepo.CreateNewUser(newUser);
-          
             // send user details
-            return Ok(userDto);
+            return Ok(user);
         }
 
         [HttpGet("currentuser")]
         public  ActionResult<UserDto> GetCurrentUser()
         {
-            var userDto = new UserDto
-            {
-                DisplayName = _userRepo.User.DisplayName,
-                Email = _userRepo.User.Email,
-                Token = _tokenService.CreateToken(_userRepo.User)
-            };
-            return Ok(userDto);
+            var user = _mediator.Send(new CurrentUser.Query());
+            return Ok(user);
         }
     }
 }
