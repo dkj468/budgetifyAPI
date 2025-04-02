@@ -1,4 +1,5 @@
 ﻿using budgetify.Application.Repositories;
+using budgetify.Application.Services;
 using budgetify.Persistence.Repositories;
 using budgetifyAPI.Repository.Incomes;
 using budgetifyAPI.Repository.Transactions;
@@ -17,6 +18,7 @@ namespace budgetify.Persistence.Extensions
             services.AddScoped<IIncomeRepository, IncomeRepostory>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IAuthService, AuthService>();
             return services;
         }
     }

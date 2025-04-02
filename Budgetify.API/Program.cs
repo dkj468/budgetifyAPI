@@ -1,4 +1,5 @@
 using Azure.Identity;
+using budgetify.Application.Areas.Expenses;
 using budgetify.Application.Repositories;
 using budgetify.Infrastructure.Extensions;
 using budgetify.Persistence.Contexts;
@@ -61,6 +62,7 @@ if ( connectionString == "" )
     Console.WriteLine("Database connection string is empty");
 }
 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateExpense.Handler).Assembly));
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration["JwtTokenKey"]);

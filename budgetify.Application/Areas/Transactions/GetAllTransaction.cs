@@ -1,4 +1,5 @@
-﻿using budgetify.Application.Repositories;
+﻿using budgetify.Application.Dtos;
+using budgetify.Application.Repositories;
 using Budgetify.Domain.Entities;
 using MediatR;
 using System;
@@ -6,23 +7,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace budgetify.Application.Areas.Transactions
 {
     public class GetAllTransaction
     {
-        public class Query : IRequest<List<AccountTransaction>> { }
+        public class Query : IRequest<List<TransactionDto>> { }
 
-        public class Handler : IRequestHandler<Query, List<AccountTransaction>>
+        public class Handler : IRequestHandler<Query, List<TransactionDto>>
         {
             private readonly ITransactionRepository _transactionRepo;
             public Handler(ITransactionRepository transactionRepository)
             {
                 _transactionRepo = transactionRepository;
             }
-            public async Task<List<AccountTransaction>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<List<TransactionDto>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return await _transactionRepo.GetAllTransactions();
+                var data = await _transactionRepo.GetAllTransactions();
+                var ThisTransactionsList = new List<TransactionDto>();
+                foreach (var transaction in data)
+                {
+                    var transactionDto = new TransactionDto
+                    {
+                        Id = transaction.Id,
+                        AccountId = transaction.AccountId,
+                        AccountName = transaction.Account != null ? transaction.Account.Name : "",
+                        Type = transaction.Type.ToString(),
+                        DateCreated = transaction.DateCreated,
+                        DateUpdated = transaction.DateUpdated,
+                        Description = transaction.Description,
+                        Amount = transaction.Amount,
+                        ClosingBalance = transaction.ClosingBalance,
+                    };
+                    ThisTransactionsList.Add(transactionDto);
+                }
+                return ThisTransactionsList;
             }
         }
     }
